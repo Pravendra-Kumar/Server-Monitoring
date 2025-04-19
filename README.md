@@ -1,4 +1,4 @@
-# 🖥️ Server Monitoring App 🚀
+# 🖥️ Server Monitoring 🚀
 
 Monitor system performance in real-time — including CPU, RAM, Disk, and Network usage — using a clean and powerful Windows Forms interface. Built for developers, sysadmins, and power users. 📊
 
