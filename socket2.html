@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>WebSocket System Stats</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #statsContainer {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      padding: 20px;
+    }
+
+    .stat {
+      margin-bottom: 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    #statDetails {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .statItem {
+      font-size: 16px;
+      margin: 5px 0;
+    }
+
+    .message {
+      max-width: 70%;
+      padding: 8px 12px;
+      margin: 5px;
+      border-radius: 10px;
+      word-wrap: break-word;
+    }
+
+    .you {
+      align-self: flex-end;
+      background-color: #dcf8c6;
+    }
+
+    .other {
+      align-self: flex-start;
+      background-color: #ffffff;
+    }
+
+    .system {
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div id="statsContainer">
+    <div id="statDetails">
+      <div class="statItem" id="cpuStat">CPU: Loading...</div>
+      <div class="statItem" id="ramStat">RAM: Loading...</div>
+      <div class="statItem" id="diskStat">Disk: Loading...</div>
+      <div class="statItem" id="netStat">Network: Loading...</div>
+      <div class="statItem" id="ipStat">IP: Loading...</div>
+      <div class="statItem" id="macStat">MAC: Loading...</div>
+    </div>
+    <!-- Chat log (optional, for debugging) -->
+    <div id="chatLog"></div>
+  </div>
+
+  <script>
+    const socket = new WebSocket("ws://localhost:59257/ws");
+
+    socket.onopen = () => {
+      appendMessage("System", "✅ Connected to WebSocket server");
+    };
+
+    socket.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        // If the data contains system stats, update the UI
+        if (data.Timestamp) {
+          updateStats(data);
+        }
+      } catch (error) {
+        appendMessage("System", "❌ Error parsing message.");
+      }
+    };
+
+    socket.onerror = (error) => {
+      appendMessage("System", "❌ WebSocket error");
+    };
+
+    socket.onclose = () => {
+      appendMessage("System", "🔌 Disconnected");
+    };
+
+    // Function to update the displayed stats
+    function updateStats(data) {
+      document.getElementById("cpuStat").textContent = `CPU: ${data.CPU}%`;
+      document.getElementById("ramStat").textContent = `RAM: ${data.RAM}%`;
+      document.getElementById("diskStat").textContent = `Disk: ${data.Disk}%`;
+      document.getElementById("netStat").textContent = `Network: ${data.NetworkKB} KB/s`;
+      document.getElementById("ipStat").textContent = `IP: ${data.IP}`;
+      document.getElementById("macStat").textContent = `MAC: ${data.MAC}`;
+    }
+
+    // Function to append messages to the UI (for debugging or future use)
+    function appendMessage(sender, message) {
+      const chatLog = document.getElementById("chatLog");
+      const msgDiv = document.createElement("div");
+      msgDiv.classList.add("message");
+
+      if (sender === "You") msgDiv.classList.add("you");
+      else if (sender === "Other") msgDiv.classList.add("other");
+      else msgDiv.classList.add("system");
+
+      msgDiv.textContent = `${sender}: ${message}`;
+      chatLog.appendChild(msgDiv);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+  </script>
+</body>
+</html>
